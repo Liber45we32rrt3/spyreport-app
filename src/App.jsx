@@ -1,4 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  Input,
+  Link,
+  Spinner,
+  Table,
+  Tag,
+  Text,
+  Title,
+} from "@nimbus-ds/components";
 import { api, resolveStoreId } from "./api";
 
 const FRASES_CARGA = [
@@ -18,7 +31,6 @@ export default function App() {
   const [fraseIdx, setFraseIdx] = useState(0);
   const [filtro, setFiltro] = useState("");
 
-  // Resolver la tienda y su estado inicial
   useEffect(() => {
     (async () => {
       const id = await resolveStoreId();
@@ -40,7 +52,6 @@ export default function App() {
     })();
   }, []);
 
-  // Rotar frases mientras se espía
   useEffect(() => {
     if (vista !== "espiando") return;
     const t = setInterval(
@@ -91,7 +102,7 @@ export default function App() {
   if (vista === "cargando") {
     return (
       <div className="centro">
-        <div className="spinner" />
+        <Spinner size="large" />
       </div>
     );
   }
@@ -99,13 +110,11 @@ export default function App() {
   if (vista === "sin-tienda") {
     return (
       <div className="centro">
-        <div className="tarjeta aviso">
-          <h2>No pudimos identificar tu tienda</h2>
-          <p>
+        <div className="angosto">
+          <Alert appearance="warning" title="No pudimos identificar tu tienda">
             Abrí SpyReport desde el panel de tu Tiendanube, en la sección
-            Aplicaciones.
-          </p>
-          {error && <p className="error">{error}</p>}
+            Aplicaciones. {error}
+          </Alert>
         </div>
       </div>
     );
@@ -114,26 +123,47 @@ export default function App() {
   if (vista === "onboarding") {
     return (
       <div className="centro">
-        <div className="tarjeta onboarding">
-          <div className="logo">🕵️ SpyReport</div>
-          <h1>¿A qué competidor querés vigilar?</h1>
-          <p className="sub">
-            Pegá la dirección de su tienda y en un minuto vas a ver sus precios
-            al lado de los tuyos.
-          </p>
-          <div className="fila-input">
-            <input
-              value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && agregar()}
-              placeholder="ejemplo: tiendadelacompetencia.com.ar"
-              autoFocus
-            />
-            <button className="btn-primario" onClick={agregar}>
-              Espiar
-            </button>
-          </div>
-          {error && <p className="error">{error}</p>}
+        <div className="angosto">
+          <Card>
+            <Card.Body>
+              <Box
+                display="flex"
+                flexDirection="column"
+                gap="4"
+                alignItems="center"
+              >
+                <Text fontWeight="bold" color="neutral-textLow">
+                  🕵️ SpyReport
+                </Text>
+                <Title as="h2" textAlign="center">
+                  ¿A qué competidor querés vigilar?
+                </Title>
+                <Text textAlign="center" color="neutral-textLow">
+                  Pegá la dirección de su tienda y en un minuto vas a ver sus
+                  precios al lado de los tuyos.
+                </Text>
+                <Box display="flex" gap="2" width="100%">
+                  <Box flex="1">
+                    <Input
+                      value={urlInput}
+                      onChange={(e) => setUrlInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && agregar()}
+                      placeholder="ejemplo: tiendadelacompetencia.com.ar"
+                      autoFocus
+                    />
+                  </Box>
+                  <Button appearance="primary" onClick={agregar}>
+                    Espiar
+                  </Button>
+                </Box>
+                {error && (
+                  <Alert appearance="danger" title="Ups">
+                    {error}
+                  </Alert>
+                )}
+              </Box>
+            </Card.Body>
+          </Card>
         </div>
       </div>
     );
@@ -142,10 +172,25 @@ export default function App() {
   if (vista === "espiando") {
     return (
       <div className="centro">
-        <div className="tarjeta onboarding">
-          <div className="spinner" />
-          <h2 className="frase-carga">{FRASES_CARGA[fraseIdx]}</h2>
-          <p className="sub">Esto tarda menos de un minuto la primera vez.</p>
+        <div className="angosto">
+          <Card>
+            <Card.Body>
+              <Box
+                display="flex"
+                flexDirection="column"
+                gap="4"
+                alignItems="center"
+              >
+                <Spinner size="large" />
+                <Title as="h4" textAlign="center">
+                  {FRASES_CARGA[fraseIdx]}
+                </Title>
+                <Text color="neutral-textLow">
+                  Esto tarda menos de un minuto la primera vez.
+                </Text>
+              </Box>
+            </Card.Body>
+          </Card>
         </div>
       </div>
     );
@@ -154,14 +199,25 @@ export default function App() {
   // ---- Dashboard ----
   return (
     <div className="panel">
-      <header className="encabezado">
-        <div className="logo">🕵️ SpyReport</div>
-        <button className="btn-secundario" onClick={() => cargarComparacion()}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        marginBottom="4"
+      >
+        <Title as="h3">🕵️ SpyReport</Title>
+        <Button appearance="neutral" onClick={() => cargarComparacion()}>
           Actualizar precios
-        </button>
-      </header>
+        </Button>
+      </Box>
 
-      {error && <p className="error">{error}</p>}
+      {error && (
+        <Box marginBottom="4">
+          <Alert appearance="danger" title="Hubo un problema">
+            {error}
+          </Alert>
+        </Box>
+      )}
 
       {data && <Resumen data={data} />}
 
@@ -190,13 +246,19 @@ function Resumen({ data }) {
   const r = data.resumen;
   return (
     <div className="grilla-resumen">
-      <div className="tarjeta metrica">
-        <span className="etiqueta">Tus productos</span>
-        <span className="numero">{r.mis_productos}</span>
-        <span className="detalle">
-          precio promedio ${fmt(r.mi_precio_promedio)}
-        </span>
-      </div>
+      <Card>
+        <Card.Body>
+          <Box display="flex" flexDirection="column" gap="1">
+            <Text fontSize="caption" color="neutral-textLow">
+              TUS PRODUCTOS
+            </Text>
+            <Title as="h2">{r.mis_productos}</Title>
+            <Text color="neutral-textLow">
+              precio promedio ${fmt(r.mi_precio_promedio)}
+            </Text>
+          </Box>
+        </Card.Body>
+      </Card>
       {r.competidores.map((c) => {
         const diff =
           r.mi_precio_promedio > 0 && c.precio_promedio > 0
@@ -205,20 +267,28 @@ function Resumen({ data }) {
               100
             : null;
         return (
-          <div className="tarjeta metrica" key={c.nombre}>
-            <span className="etiqueta">{c.nombre}</span>
-            <span className="numero">{c.productos}</span>
-            <span className="detalle">
-              precio promedio ${fmt(c.precio_promedio)}
-            </span>
-            {diff !== null && (
-              <span className={diff <= 0 ? "chip verde" : "chip rojo"}>
-                {diff <= 0
-                  ? `Estás ${Math.abs(diff).toFixed(0)}% más barato`
-                  : `Estás ${diff.toFixed(0)}% más caro`}
-              </span>
-            )}
-          </div>
+          <Card key={c.nombre}>
+            <Card.Body>
+              <Box display="flex" flexDirection="column" gap="1">
+                <Text fontSize="caption" color="neutral-textLow">
+                  {c.nombre.toUpperCase()}
+                </Text>
+                <Title as="h2">{c.productos}</Title>
+                <Text color="neutral-textLow">
+                  precio promedio ${fmt(c.precio_promedio)}
+                </Text>
+                {diff !== null && (
+                  <Box>
+                    <Tag appearance={diff <= 0 ? "success" : "danger"}>
+                      {diff <= 0
+                        ? `Estás ${Math.abs(diff).toFixed(0)}% más barato`
+                        : `Estás ${diff.toFixed(0)}% más caro`}
+                    </Tag>
+                  </Box>
+                )}
+              </Box>
+            </Card.Body>
+          </Card>
         );
       })}
     </div>
@@ -233,32 +303,43 @@ function SeccionCompetidores({
   onAgregar,
 }) {
   return (
-    <div className="tarjeta seccion">
-      <h3>Competidores vigilados</h3>
-      <ul className="lista-comp">
-        {competidores.map((c) => (
-          <li key={c.id}>
-            <span>{c.nombre}</span>
-            <button className="btn-texto" onClick={() => onBorrar(c.id)}>
-              Dejar de vigilar
-            </button>
-          </li>
-        ))}
-      </ul>
-      {competidores.length < 3 && (
-        <div className="fila-input">
-          <input
-            value={urlInput}
-            onChange={(e) => setUrlInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && onAgregar()}
-            placeholder="Agregar otro competidor (URL)"
-          />
-          <button className="btn-primario" onClick={onAgregar}>
-            Agregar
-          </button>
-        </div>
-      )}
-    </div>
+    <Box marginY="4">
+      <Card>
+        <Card.Header title="Competidores vigilados" />
+        <Card.Body>
+          <Box display="flex" flexDirection="column" gap="3">
+            {competidores.map((c) => (
+              <Box
+                key={c.id}
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Text>{c.nombre}</Text>
+                <Link appearance="danger" onClick={() => onBorrar(c.id)}>
+                  Dejar de vigilar
+                </Link>
+              </Box>
+            ))}
+            {competidores.length < 3 && (
+              <Box display="flex" gap="2">
+                <Box flex="1">
+                  <Input
+                    value={urlInput}
+                    onChange={(e) => setUrlInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && onAgregar()}
+                    placeholder="Agregar otro competidor (URL)"
+                  />
+                </Box>
+                <Button appearance="primary" onClick={onAgregar}>
+                  Agregar
+                </Button>
+              </Box>
+            )}
+          </Box>
+        </Card.Body>
+      </Card>
+    </Box>
   );
 }
 
@@ -272,44 +353,51 @@ function TablaCompetidor({ comp, filtro, setFiltro }) {
   }, [comp.productos, filtro]);
 
   return (
-    <div className="tarjeta seccion">
-      <div className="fila-titulo">
-        <h3>Precios de {comp.nombre}</h3>
-        <input
-          className="buscador"
-          value={filtro}
-          onChange={(e) => setFiltro(e.target.value)}
-          placeholder="Buscar producto…"
-        />
-      </div>
-      {comp.error && (
-        <p className="error">No pudimos leer esta tienda: {comp.error}</p>
-      )}
-      <table>
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th className="der">Precio</th>
-            <th>Stock</th>
-          </tr>
-        </thead>
-        <tbody>
-          {productos.map((p, i) => (
-            <tr key={i}>
-              <td>{p.nombre}</td>
-              <td className="der">${fmt(p.precio)}</td>
-              <td>
-                <span
-                  className={p.stock === "InStock" ? "chip verde" : "chip gris"}
-                >
-                  {p.stock === "InStock" ? "Con stock" : "Sin stock"}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Box marginBottom="4">
+      <Card padding="none">
+        <Card.Header padding="base" title={`Precios de ${comp.nombre}`} />
+        <Card.Body>
+          <Box paddingX="4" paddingBottom="2">
+            <Input
+              value={filtro}
+              onChange={(e) => setFiltro(e.target.value)}
+              placeholder="Buscar producto…"
+            />
+          </Box>
+          {comp.error && (
+            <Box padding="4">
+              <Alert appearance="danger" title="No pudimos leer esta tienda">
+                {comp.error}
+              </Alert>
+            </Box>
+          )}
+          <Table>
+            <Table.Head>
+              <Table.Row>
+                <Table.Cell as="th">Producto</Table.Cell>
+                <Table.Cell as="th">Precio</Table.Cell>
+                <Table.Cell as="th">Stock</Table.Cell>
+              </Table.Row>
+            </Table.Head>
+            <Table.Body>
+              {productos.map((p, i) => (
+                <Table.Row key={i}>
+                  <Table.Cell>{p.nombre}</Table.Cell>
+                  <Table.Cell>${fmt(p.precio)}</Table.Cell>
+                  <Table.Cell>
+                    <Tag
+                      appearance={p.stock === "InStock" ? "success" : "neutral"}
+                    >
+                      {p.stock === "InStock" ? "Con stock" : "Sin stock"}
+                    </Tag>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table>
+        </Card.Body>
+      </Card>
+    </Box>
   );
 }
 
