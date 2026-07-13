@@ -23,7 +23,7 @@ const FRASES_CARGA = [
 
 export default function App() {
   const [storeId, setStoreId] = useState(null);
-  const [vista, setVista] = useState("cargando"); // cargando | sin-tienda | onboarding | espiando | dashboard
+  const [vista, setVista] = useState("cargando"); // cargando | sin-tienda | bloqueada | onboarding | espiando | dashboard
   const [competidores, setCompetidores] = useState([]);
   const [data, setData] = useState(null);
   const [urlInput, setUrlInput] = useState("");
@@ -36,6 +36,19 @@ export default function App() {
       const id = await resolveStoreId();
       if (!id) return setVista("sin-tienda");
       setStoreId(id);
+
+      // Verificar suscripción antes de mostrar la app.
+      // "desconocido" deja pasar: mejor entrar con Billing caído
+      // que bloquear a un cliente que pagó.
+      try {
+        const sus = await api.suscripcion(id);
+        if (!sus.activa && sus.estado !== "desconocido") {
+          return setVista("bloqueada");
+        }
+      } catch (_) {
+        /* si el chequeo falla, dejamos pasar */
+      }
+
       try {
         const comps = await api.competidores(id);
         setCompetidores(comps);
@@ -115,6 +128,50 @@ export default function App() {
             Abrí SpyReport desde el panel de tu Tiendanube, en la sección
             Aplicaciones. {error}
           </Alert>
+        </div>
+      </div>
+    );
+  }
+
+  if (vista === "bloqueada") {
+    return (
+      <div className="centro">
+        <div className="angosto">
+          <Card>
+            <Card.Body>
+              <Box
+                display="flex"
+                flexDirection="column"
+                gap="4"
+                alignItems="center"
+              >
+                <Text fontWeight="bold" color="neutral-textLow">
+                  🕵️ SpyReport
+                </Text>
+                <Title as="h2" textAlign="center">
+                  Activá tu plan para seguir espiando
+                </Title>
+                <Text textAlign="center" color="neutral-textLow">
+                  Tu período de prueba terminó. Activá la suscripción para
+                  volver a ver los precios de tu competencia al lado de los
+                  tuyos.
+                </Text>
+                <Button
+                  appearance="primary"
+                  onClick={() => window.open("/admin/v2/apps", "_top")}
+                >
+                  Activar mi plan
+                </Button>
+                <Text
+                  fontSize="caption"
+                  color="neutral-textLow"
+                  textAlign="center"
+                >
+                  ¿Ya lo activaste? Cerrá y volvé a abrir SpyReport.
+                </Text>
+              </Box>
+            </Card.Body>
+          </Card>
         </div>
       </div>
     );
