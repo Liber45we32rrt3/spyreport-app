@@ -1,12 +1,8 @@
 // Conexión con el backend de SpyReport (Railway) y con el panel de Tiendanube (Nexo)
 import nexo from "@tiendanube/nexo";
-
 const { connect, iAmReady, getStoreInfo } = nexo;
-
 export const BACKEND = "https://spyreport-scraper-production.up.railway.app";
-
 const instance = nexo.create({ clientId: "33732", log: false });
-
 // Devuelve el ID de la tienda:
 // 1. Si la app corre embebida en el panel de Tiendanube → lo pide via Nexo
 // 2. Si corre suelta en el navegador (modo prueba) → lo lee de ?store_id=
@@ -25,7 +21,6 @@ export async function resolveStoreId() {
   }
   return param;
 }
-
 async function req(path, options = {}) {
   const res = await fetch(`${BACKEND}${path}`, {
     headers: { "Content-Type": "application/json" },
@@ -35,7 +30,6 @@ async function req(path, options = {}) {
   if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
   return data;
 }
-
 export const api = {
   competidores: (storeId) => req(`/api/tiendas/${storeId}/competidores`),
   agregarCompetidor: (storeId, url) =>
@@ -46,4 +40,5 @@ export const api = {
   borrarCompetidor: (storeId, compId) =>
     req(`/api/tiendas/${storeId}/competidores/${compId}`, { method: "DELETE" }),
   comparacion: (storeId) => req(`/api/tiendas/${storeId}/comparacion`),
+  suscripcion: (storeId) => req(`/api/tiendas/${storeId}/suscripcion`),
 };
