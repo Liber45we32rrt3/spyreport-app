@@ -37,17 +37,15 @@ export default function App() {
       if (!id) return setVista("sin-tienda");
       setStoreId(id);
 
-      // Verificar suscripción antes de mostrar la app.
-      // "desconocido" deja pasar: mejor entrar con Billing caído
-      // que bloquear a un cliente que pagó.
-      try {
-        const sus = await api.suscripcion(id);
-        if (!sus.activa && sus.estado !== "desconocido") {
-          return setVista("bloqueada");
-        }
-      } catch (_) {
-        /* si el chequeo falla, dejamos pasar */
-      }
+      // BYPASS TEMPORAL PARA GRABAR EL VIDEO — DESCOMENTAR ANTES DE HOMOLOGAR
+      // try {
+      //   const sus = await api.suscripcion(id);
+      //   if (!sus.activa && sus.estado !== "desconocido") {
+      //     return setVista("bloqueada");
+      //   }
+      // } catch (_) {
+      //   /* si el chequeo falla, dejamos pasar */
+      // }
 
       try {
         const comps = await api.competidores(id);
@@ -156,13 +154,12 @@ export default function App() {
                   volver a ver los precios de tu competencia al lado de los
                   tuyos.
                 </Text>
-                
                 <Button
                   appearance="primary"
                   onClick={() => irAlAdmin("/apps")}
-               >
-                 Activar mi plan
-                 </Button>
+                >
+                  Activar mi plan
+                </Button>
                 <Text
                   fontSize="caption"
                   color="neutral-textLow"
