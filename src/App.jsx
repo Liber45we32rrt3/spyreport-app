@@ -12,7 +12,7 @@ import {
   Text,
   Title,
 } from "@nimbus-ds/components";
-import { api, resolveStoreId } from "./api";
+import { api, resolveStoreId, irAlAdmin } from "./api";
 
 const FRASES_CARGA = [
   "Visitando la tienda de tu competencia…",
@@ -156,12 +156,13 @@ export default function App() {
                   volver a ver los precios de tu competencia al lado de los
                   tuyos.
                 </Text>
+                
                 <Button
                   appearance="primary"
-                  onClick={() => window.open("/admin/v2/apps", "_top")}
-                >
-                  Activar mi plan
-                </Button>
+                  onClick={() => irAlAdmin("/apps")}
+               >
+                 Activar mi plan
+                 </Button>
                 <Text
                   fontSize="caption"
                   color="neutral-textLow"
