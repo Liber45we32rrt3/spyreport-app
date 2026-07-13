@@ -42,3 +42,12 @@ export const api = {
   comparacion: (storeId) => req(`/api/tiendas/${storeId}/comparacion`),
   suscripcion: (storeId) => req(`/api/tiendas/${storeId}/suscripcion`),
 };
+// Navega el panel de Tiendanube (fuera del iframe) hacia una sección del admin
+export function irAlAdmin(path) {
+  try {
+    nexo.goTo(instance, path);
+  } catch (_) {
+    // Fallback si Nexo no está disponible (modo prueba fuera del panel)
+    if (window.top) window.top.location.href = `/admin/v2${path}`;
+  }
+}
