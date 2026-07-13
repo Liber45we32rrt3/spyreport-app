@@ -37,15 +37,17 @@ export default function App() {
       if (!id) return setVista("sin-tienda");
       setStoreId(id);
 
-      // BYPASS TEMPORAL PARA GRABAR EL VIDEO — DESCOMENTAR ANTES DE HOMOLOGAR
-      // try {
-      //   const sus = await api.suscripcion(id);
-      //   if (!sus.activa && sus.estado !== "desconocido") {
-      //     return setVista("bloqueada");
-      //   }
-      // } catch (_) {
-      //   /* si el chequeo falla, dejamos pasar */
-      // }
+      // Verificar suscripción antes de mostrar la app.
+      // "desconocido" deja pasar: mejor entrar con Billing caído
+      // que bloquear a un cliente que pagó.
+      try {
+        const sus = await api.suscripcion(id);
+        if (!sus.activa && sus.estado !== "desconocido") {
+          return setVista("bloqueada");
+        }
+      } catch (_) {
+        /* si el chequeo falla, dejamos pasar */
+      }
 
       try {
         const comps = await api.competidores(id);
