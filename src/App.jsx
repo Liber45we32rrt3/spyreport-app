@@ -37,16 +37,25 @@ export default function App() {
       if (!id) return setVista("sin-tienda");
       setStoreId(id);
 
-      // Verificar suscripción antes de mostrar la app.
-      // "desconocido" deja pasar: mejor entrar con Billing caído
-      // que bloquear a un cliente que pagó.
-      try {
-        const sus = await api.suscripcion(id);
-        if (!sus.activa && sus.estado !== "desconocido") {
-          return setVista("bloqueada");
+      // Tiendas liberadas de la verificación de suscripción.
+      // Requisito de homologación de Tiendanube: la cuenta demo debe estar
+      // "liberada de las etapas de suscripción" para que el equipo valide sin
+      // trabarse en el paywall. La demo (7818119) entra siempre; las tiendas
+      // reales siguen con la verificación normal.
+      const TIENDAS_LIBERADAS = ["7818119"];
+
+      if (!TIENDAS_LIBERADAS.includes(String(id))) {
+        // Verificar suscripción antes de mostrar la app.
+        // "desconocido" deja pasar: mejor entrar con Billing caído
+        // que bloquear a un cliente que pagó.
+        try {
+          const sus = await api.suscripcion(id);
+          if (!sus.activa && sus.estado !== "desconocido") {
+            return setVista("bloqueada");
+          }
+        } catch (_) {
+          /* si el chequeo falla, dejamos pasar */
         }
-      } catch (_) {
-        /* si el chequeo falla, dejamos pasar */
       }
 
       try {
