@@ -470,3 +470,4 @@ function TablaCompetidor({ comp, filtro, setFiltro }) {
 function fmt(n) {
   return Number(n || 0).toLocaleString("es-AR");
 }
+// redeploy
