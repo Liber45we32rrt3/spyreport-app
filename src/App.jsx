@@ -42,7 +42,7 @@ export default function App() {
       // "liberada de las etapas de suscripción" para que el equipo valide sin
       // trabarse en el paywall. La demo (7818119) entra siempre; las tiendas
       // reales siguen con la verificación normal.
-      const TIENDAS_LIBERADAS = ["7818119"];
+      const TIENDAS_LIBERADAS = ["7818119", "4265771"];
 
       if (!TIENDAS_LIBERADAS.includes(String(id))) {
         // Verificar suscripción antes de mostrar la app.
