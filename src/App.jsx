@@ -29,7 +29,6 @@ export default function App() {
   const [urlInput, setUrlInput] = useState("");
   const [error, setError] = useState("");
   const [fraseIdx, setFraseIdx] = useState(0);
-  const [filtro, setFiltro] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -297,12 +296,7 @@ export default function App() {
 
       {data &&
         data.competidores.map((c) => (
-          <TablaCompetidor
-            key={c.id}
-            comp={c}
-            filtro={filtro}
-            setFiltro={setFiltro}
-          />
+          <TablaCompetidor key={c.id} comp={c} />
         ))}
     </div>
   );
@@ -409,7 +403,10 @@ function SeccionCompetidores({
   );
 }
 
-function TablaCompetidor({ comp, filtro, setFiltro }) {
+function TablaCompetidor({ comp }) {
+  // Cada tabla tiene su PROPIO filtro, independiente de las demás.
+  const [filtro, setFiltro] = useState("");
+
   const productos = useMemo(() => {
     const lista = [...comp.productos].sort((a, b) => a.precio - b.precio);
     if (!filtro) return lista;
@@ -470,5 +467,3 @@ function TablaCompetidor({ comp, filtro, setFiltro }) {
 function fmt(n) {
   return Number(n || 0).toLocaleString("es-AR");
 }
-// redeploy 2
-// redeploy
