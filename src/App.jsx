@@ -44,9 +44,6 @@ export default function App() {
       const TIENDAS_LIBERADAS = ["7818119", "4265771"];
 
       if (!TIENDAS_LIBERADAS.includes(String(id))) {
-        // Verificar suscripción antes de mostrar la app.
-        // "desconocido" deja pasar: mejor entrar con Billing caído
-        // que bloquear a un cliente que pagó.
         try {
           const sus = await api.suscripcion(id);
           if (!sus.activa && sus.estado !== "desconocido") {
@@ -64,7 +61,7 @@ export default function App() {
           setVista("onboarding");
         } else {
           setVista("espiando");
-          cargarComparacion(id);
+          cargarComparacion(id, comps);
         }
       } catch (e) {
         setError(e.message);
@@ -82,7 +79,7 @@ export default function App() {
     return () => clearInterval(t);
   }, [vista]);
 
-  async function cargarComparacion(id = storeId) {
+  async function cargarComparacion(id = storeId, compsActuales = competidores) {
     setVista("espiando");
     setError("");
     try {
@@ -90,8 +87,17 @@ export default function App() {
       setData(d);
       setVista("dashboard");
     } catch (e) {
-      setError(e.message);
-      setVista(competidores.length ? "dashboard" : "onboarding");
+      // Si la comparación falla (timeout de scraping, red, etc.) NO dejamos
+      // al usuario trabado. Si ya tiene competidores, mostramos el dashboard
+      // igual (con la lista y la opción de gestionarlos); solo si no tiene
+      // ninguno volvemos al onboarding.
+      setError(
+        "No pudimos cargar la comparación en este momento. " +
+          "Podés reintentar con “Actualizar precios” o quitar un competidor."
+      );
+      const tieneComps = (compsActuales && compsActuales.length > 0);
+      setData(null);
+      setVista(tieneComps ? "dashboard" : "onboarding");
     }
   }
 
@@ -100,9 +106,10 @@ export default function App() {
     setError("");
     try {
       const nuevo = await api.agregarCompetidor(storeId, urlInput.trim());
-      setCompetidores((c) => [...c, nuevo]);
+      const nuevos = [...competidores, nuevo];
+      setCompetidores(nuevos);
       setUrlInput("");
-      cargarComparacion();
+      cargarComparacion(storeId, nuevos);
     } catch (e) {
       setError(e.message);
     }
@@ -116,7 +123,7 @@ export default function App() {
       setData(null);
       setVista("onboarding");
     } else {
-      cargarComparacion();
+      cargarComparacion(storeId, restantes);
     }
   }
 
@@ -278,7 +285,7 @@ export default function App() {
 
       {error && (
         <Box marginBottom="4">
-          <Alert appearance="danger" title="Hubo un problema">
+          <Alert appearance="warning" title="Atención">
             {error}
           </Alert>
         </Box>
@@ -404,7 +411,6 @@ function SeccionCompetidores({
 }
 
 function TablaCompetidor({ comp }) {
-  // Cada tabla tiene su PROPIO filtro, independiente de las demás.
   const [filtro, setFiltro] = useState("");
 
   const productos = useMemo(() => {
