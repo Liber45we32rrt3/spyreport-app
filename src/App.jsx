@@ -452,24 +452,7 @@ function TablaCompetidor({ comp }) {
               {productos.map((p, i) => (
                 <Table.Row key={i}>
                   <Table.Cell>
-                    {p.url ? (
-                      
-                        href={p.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          color: "inherit",
-                          textDecoration: "underline",
-                          textDecorationColor: "#c0c0c0",
-                          textUnderlineOffset: "2px",
-                        }}
-                        title="Ver producto en la tienda"
-                      >
-                        {p.nombre}
-                      </a>
-                    ) : (
-                      p.nombre
-                    )}
+                    <NombreProducto producto={p} />
                   </Table.Cell>
                   <Table.Cell>${fmt(p.precio)}</Table.Cell>
                   <Table.Cell>
@@ -486,6 +469,28 @@ function TablaCompetidor({ comp }) {
         </Card.Body>
       </Card>
     </Box>
+  );
+}
+
+function NombreProducto({ producto }) {
+  if (!producto.url) {
+    return <>{producto.nombre}</>;
+  }
+  return (
+    
+      href={producto.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="Ver producto en la tienda"
+      style={{
+        color: "inherit",
+        textDecoration: "underline",
+        textDecorationColor: "#c0c0c0",
+        textUnderlineOffset: "2px",
+      }}
+    >
+      {producto.nombre}
+    </a>
   );
 }
 
