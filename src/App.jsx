@@ -451,7 +451,26 @@ function TablaCompetidor({ comp }) {
             <Table.Body>
               {productos.map((p, i) => (
                 <Table.Row key={i}>
-                  <Table.Cell>{p.nombre}</Table.Cell>
+                  <Table.Cell>
+                    {p.url ? (
+                      
+                        href={p.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: "inherit",
+                          textDecoration: "underline",
+                          textDecorationColor: "#c0c0c0",
+                          textUnderlineOffset: "2px",
+                        }}
+                        title="Ver producto en la tienda"
+                      >
+                        {p.nombre}
+                      </a>
+                    ) : (
+                      p.nombre
+                    )}
+                  </Table.Cell>
                   <Table.Cell>${fmt(p.precio)}</Table.Cell>
                   <Table.Cell>
                     <Tag
