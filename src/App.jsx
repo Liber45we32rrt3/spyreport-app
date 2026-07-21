@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -474,23 +474,23 @@ function TablaCompetidor({ comp }) {
 
 function NombreProducto({ producto }) {
   if (!producto.url) {
-    return <>{producto.nombre}</>;
+    return React.createElement(React.Fragment, null, producto.nombre);
   }
-  return (
-    
-      href={producto.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      title="Ver producto en la tienda"
-      style={{
+  return React.createElement(
+    "a",
+    {
+      href: producto.url,
+      target: "_blank",
+      rel: "noopener noreferrer",
+      title: "Ver producto en la tienda",
+      style: {
         color: "inherit",
         textDecoration: "underline",
         textDecorationColor: "#c0c0c0",
         textUnderlineOffset: "2px",
-      }}
-    >
-      {producto.nombre}
-    </a>
+      },
+    },
+    producto.nombre
   );
 }
 
