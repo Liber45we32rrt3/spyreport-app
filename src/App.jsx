@@ -21,6 +21,25 @@ const FRASES_CARGA = [
   "Detectando oportunidades para tu tienda…",
 ];
 
+// Título de marca con tratamiento tipográfico propio (sin emoji).
+function LogoSpyReport({ size = "22px" }) {
+  return (
+    <span
+      style={{
+        fontFamily:
+          "'JetBrains Mono', 'SF Mono', 'Fira Code', ui-monospace, Menlo, monospace",
+        fontSize: size,
+        fontWeight: 700,
+        letterSpacing: "-0.02em",
+        lineHeight: 1,
+      }}
+    >
+      <span style={{ color: "#111827" }}>Spy</span>
+      <span style={{ color: "#2563eb" }}>Report</span>
+    </span>
+  );
+}
+
 // Limpia "GMNIMPORTADOS.MITIENDANUBE.COM" → "Gmnimportados"
 function nombreLindo(dominio) {
   let base = String(dominio || "")
@@ -44,12 +63,7 @@ export default function App() {
   const [urlInput, setUrlInput] = useState("");
   const [error, setError] = useState("");
   const [fraseIdx, setFraseIdx] = useState(0);
-  const [tema, setTema] = useState("claro");
   const [ultimoAnalisis, setUltimoAnalisis] = useState(null);
-
-  const oscuro = tema === "oscuro";
-  const bg = oscuro ? "#14161a" : "transparent";
-  const textoColor = oscuro ? "#e8eaed" : undefined;
 
   useEffect(() => {
     (async () => {
@@ -137,148 +151,138 @@ export default function App() {
     }
   }
 
-  const contenido = (() => {
-    if (vista === "cargando") {
-      return (
-        <PantallaCentro>
-          <Spinner size="large" />
-          <Box marginTop="4">
-            <Title as="h4" textAlign="center">Preparando SpyReport</Title>
-          </Box>
-          <Text color="neutral-textLow">Cargando información de tu tienda…</Text>
-        </PantallaCentro>
-      );
-    }
-
-    if (vista === "sin-tienda") {
-      return (
-        <PantallaCentro>
-          <Box maxWidth="420px" width="100%">
-            <Alert appearance="warning" title="No encontramos tu tienda">
-              Abrí SpyReport desde el panel de aplicaciones de Tiendanube. {error}
-            </Alert>
-          </Box>
-        </PantallaCentro>
-      );
-    }
-
-    if (vista === "bloqueada") {
-      return (
-        <PantallaCentro>
-          <Box maxWidth="420px" width="100%">
-            <Card>
-              <Card.Body>
-                <Box display="flex" flexDirection="column" gap="4" alignItems="center">
-                  <Text fontWeight="bold" color="neutral-textLow">🕵️ SpyReport</Text>
-                  <Title as="h3" textAlign="center">Activá tu plan para seguir espiando</Title>
-                  <Text color="neutral-textLow" textAlign="center">
-                    Tu período de prueba terminó. Activá tu suscripción para volver a analizar tu competencia.
-                  </Text>
-                  <Button appearance="primary" onClick={() => irAlAdmin("/apps")}>
-                    Activar mi plan
-                  </Button>
-                  <Text fontSize="caption" color="neutral-textLow" textAlign="center">
-                    ¿Ya lo activaste? Cerrá y volvé a abrir SpyReport.
-                  </Text>
-                </Box>
-              </Card.Body>
-            </Card>
-          </Box>
-        </PantallaCentro>
-      );
-    }
-
-    if (vista === "onboarding") {
-      return (
-        <PantallaCentro>
-          <Box maxWidth="480px" width="100%">
-            <Card>
-              <Card.Body>
-                <Box display="flex" flexDirection="column" gap="4" alignItems="center">
-                  <Text fontSize="featured" fontWeight="bold">🕵️</Text>
-                  <Title as="h3" textAlign="center">Empezá a monitorear tu competencia</Title>
-                  <Text color="neutral-textLow" textAlign="center">
-                    Pegá la dirección de una tienda competidora y en menos de un minuto vas a ver
-                    sus precios y stock al lado de los tuyos. Podés vigilar hasta 3.
-                  </Text>
-                  <Box display="flex" gap="2" width="100%">
-                    <Box flex="1">
-                      <Input
-                        value={urlInput}
-                        onChange={(e) => setUrlInput(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && agregar()}
-                        placeholder="tiendadelacompetencia.com.ar"
-                      />
-                    </Box>
-                    <Button appearance="primary" onClick={agregar}>Espiar</Button>
-                  </Box>
-                  {error && <Alert appearance="danger" title="Ups">{error}</Alert>}
-                </Box>
-              </Card.Body>
-            </Card>
-          </Box>
-        </PantallaCentro>
-      );
-    }
-
-    if (vista === "espiando") {
-      return (
-        <PantallaCentro>
-          <Box maxWidth="420px" width="100%">
-            <Card>
-              <Card.Body>
-                <Box display="flex" flexDirection="column" gap="4" alignItems="center">
-                  <Spinner size="large" />
-                  <Title as="h4" textAlign="center">{FRASES_CARGA[fraseIdx]}</Title>
-                  <Text color="neutral-textLow" textAlign="center">
-                    Esto tarda menos de un minuto la primera vez.
-                  </Text>
-                </Box>
-              </Card.Body>
-            </Card>
-          </Box>
-        </PantallaCentro>
-      );
-    }
-
-    // ---- Dashboard ----
+  if (vista === "cargando") {
     return (
-      <Box padding="6">
-        <HeaderDashboard
-          data={data}
-          competidores={competidores}
-          ultimoAnalisis={ultimoAnalisis}
-          onActualizar={() => cargarComparacion()}
-          tema={tema}
-          setTema={setTema}
-        />
-
-        {error && (
-          <Box marginBottom="4">
-            <Alert appearance="warning" title="Atención">{error}</Alert>
-          </Box>
-        )}
-
-        {data && <Insights data={data} />}
-        {data && <ResumenMetricas data={data} />}
-
-        <SeccionCompetidores
-          competidores={competidores}
-          onBorrar={borrar}
-          urlInput={urlInput}
-          setUrlInput={setUrlInput}
-          onAgregar={agregar}
-        />
-
-        {data && data.competidores.map((c) => <TablaCompetidor key={c.id} comp={c} />)}
-      </Box>
+      <PantallaCentro>
+        <Spinner size="large" />
+        <Box marginTop="4">
+          <Title as="h4" textAlign="center">Preparando SpyReport</Title>
+        </Box>
+        <Text color="neutral-textLow">Cargando información de tu tienda…</Text>
+      </PantallaCentro>
     );
-  })();
+  }
 
+  if (vista === "sin-tienda") {
+    return (
+      <PantallaCentro>
+        <Box maxWidth="420px" width="100%">
+          <Alert appearance="warning" title="No encontramos tu tienda">
+            Abrí SpyReport desde el panel de aplicaciones de Tiendanube. {error}
+          </Alert>
+        </Box>
+      </PantallaCentro>
+    );
+  }
+
+  if (vista === "bloqueada") {
+    return (
+      <PantallaCentro>
+        <Box maxWidth="420px" width="100%">
+          <Card>
+            <Card.Body>
+              <Box display="flex" flexDirection="column" gap="4" alignItems="center">
+                <LogoSpyReport size="26px" />
+                <Title as="h3" textAlign="center">Activá tu plan para seguir espiando</Title>
+                <Text color="neutral-textLow" textAlign="center">
+                  Tu período de prueba terminó. Activá tu suscripción para volver a analizar tu competencia.
+                </Text>
+                <Button appearance="primary" onClick={() => irAlAdmin("/apps")}>
+                  Activar mi plan
+                </Button>
+                <Text fontSize="caption" color="neutral-textLow" textAlign="center">
+                  ¿Ya lo activaste? Cerrá y volvé a abrir SpyReport.
+                </Text>
+              </Box>
+            </Card.Body>
+          </Card>
+        </Box>
+      </PantallaCentro>
+    );
+  }
+
+  if (vista === "onboarding") {
+    return (
+      <PantallaCentro>
+        <Box maxWidth="480px" width="100%">
+          <Card>
+            <Card.Body>
+              <Box display="flex" flexDirection="column" gap="4" alignItems="center">
+                <LogoSpyReport size="30px" />
+                <Title as="h3" textAlign="center">Empezá a monitorear tu competencia</Title>
+                <Text color="neutral-textLow" textAlign="center">
+                  Pegá la dirección de una tienda competidora y en menos de un minuto vas a ver
+                  sus precios y stock al lado de los tuyos. Podés vigilar hasta 3.
+                </Text>
+                <Box display="flex" gap="2" width="100%">
+                  <Box flex="1">
+                    <Input
+                      value={urlInput}
+                      onChange={(e) => setUrlInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && agregar()}
+                      placeholder="tiendadelacompetencia.com.ar"
+                    />
+                  </Box>
+                  <Button appearance="primary" onClick={agregar}>Espiar</Button>
+                </Box>
+                {error && <Alert appearance="danger" title="Ups">{error}</Alert>}
+              </Box>
+            </Card.Body>
+          </Card>
+        </Box>
+      </PantallaCentro>
+    );
+  }
+
+  if (vista === "espiando") {
+    return (
+      <PantallaCentro>
+        <Box maxWidth="420px" width="100%">
+          <Card>
+            <Card.Body>
+              <Box display="flex" flexDirection="column" gap="4" alignItems="center">
+                <Spinner size="large" />
+                <Title as="h4" textAlign="center">{FRASES_CARGA[fraseIdx]}</Title>
+                <Text color="neutral-textLow" textAlign="center">
+                  Esto tarda menos de un minuto la primera vez.
+                </Text>
+              </Box>
+            </Card.Body>
+          </Card>
+        </Box>
+      </PantallaCentro>
+    );
+  }
+
+  // ---- Dashboard ----
   return (
-    <div style={{ background: bg, minHeight: "100vh", color: textoColor }}>
-      {contenido}
-    </div>
+    <Box padding="6">
+      <HeaderDashboard
+        data={data}
+        competidores={competidores}
+        ultimoAnalisis={ultimoAnalisis}
+        onActualizar={() => cargarComparacion()}
+      />
+
+      {error && (
+        <Box marginBottom="4">
+          <Alert appearance="warning" title="Atención">{error}</Alert>
+        </Box>
+      )}
+
+      {data && <Insights data={data} />}
+      {data && <ResumenMetricas data={data} />}
+
+      <SeccionCompetidores
+        competidores={competidores}
+        onBorrar={borrar}
+        urlInput={urlInput}
+        setUrlInput={setUrlInput}
+        onAgregar={agregar}
+      />
+
+      {data && data.competidores.map((c) => <TablaCompetidor key={c.id} comp={c} />)}
+    </Box>
   );
 }
 
@@ -308,7 +312,7 @@ function tiempoRelativo(fecha) {
   return `hace ${hs} h`;
 }
 
-function HeaderDashboard({ data, competidores, ultimoAnalisis, onActualizar, tema, setTema }) {
+function HeaderDashboard({ data, competidores, ultimoAnalisis, onActualizar }) {
   const totalProductosComp = (data?.competidores || []).reduce(
     (acc, c) => acc + (c.productos ? c.productos.length : 0),
     0
@@ -317,23 +321,15 @@ function HeaderDashboard({ data, competidores, ultimoAnalisis, onActualizar, tem
     <Box marginBottom="6">
       <Box display="flex" justifyContent="space-between" alignItems="flex-start" flexWrap="wrap" gap="4">
         <Box display="flex" flexDirection="column" gap="1">
-          <Title as="h3">🕵️ SpyReport</Title>
+          <LogoSpyReport size="24px" />
           <Text color="neutral-textLow">Inteligencia competitiva para tu tienda</Text>
         </Box>
-        <Box display="flex" gap="2" alignItems="center">
-          <Button
-            appearance="neutral"
-            onClick={() => setTema(tema === "oscuro" ? "claro" : "oscuro")}
-          >
-            {tema === "oscuro" ? "☀️ Claro" : "🌙 Oscuro"}
-          </Button>
-          <Button appearance="primary" onClick={onActualizar}>
-            Actualizar análisis
-          </Button>
-        </Box>
+        <Button appearance="primary" onClick={onActualizar}>
+          Actualizar análisis
+        </Button>
       </Box>
 
-      <Box display="flex" gap="4" marginTop="4" flexWrap="wrap">
+      <Box display="flex" gap="6" marginTop="4" flexWrap="wrap">
         <MiniStat etiqueta="Último análisis" valor={tiempoRelativo(ultimoAnalisis)} />
         <MiniStat etiqueta="Competidores activos" valor={String(competidores.length)} />
         <MiniStat etiqueta="Productos analizados" valor={String(totalProductosComp)} />
@@ -351,8 +347,6 @@ function MiniStat({ etiqueta, valor }) {
   );
 }
 
-// Insights REALES: todo sale de comparar precios promedio y contar stock.
-// Sin números de ejemplo hardcodeados — si un dato no existe, no se muestra.
 function calcularInsights(data) {
   const r = data.resumen;
   const mio = r.mi_precio_promedio || 0;
@@ -382,20 +376,23 @@ function Insights({ data }) {
   if (masBaratos > 0)
     items.push({
       tono: "danger",
+      etiqueta: "Atención",
       texto: `${masBaratos} competidor${masBaratos > 1 ? "es tienen" : " tiene"} un precio promedio más bajo que el tuyo. Revisá dónde podés estar perdiendo ventas.`,
     });
   if (masCaros > 0)
     items.push({
       tono: "success",
+      etiqueta: "Oportunidad",
       texto: `Estás por debajo de ${masCaros} competidor${masCaros > 1 ? "es" : ""} en precio promedio. Ahí tenés margen para subir sin perder competitividad.`,
     });
   if (sinStock > 0)
     items.push({
       tono: "warning",
+      etiqueta: "Revisar",
       texto: `${sinStock} producto${sinStock > 1 ? "s están" : " está"} sin stock en tus competidores. Es demanda que podrías captar vos.`,
     });
   if (items.length === 0)
-    items.push({ tono: "neutral", texto: "Agregá competidores y actualizá para ver oportunidades de precio y stock." });
+    items.push({ tono: "neutral", etiqueta: "Info", texto: "Agregá competidores y actualizá para ver oportunidades de precio y stock." });
 
   return (
     <Box marginBottom="5">
@@ -407,9 +404,7 @@ function Insights({ data }) {
           <Box display="flex" flexDirection="column" gap="3">
             {items.map((it, i) => (
               <Box key={i} display="flex" gap="2" alignItems="flex-start">
-                <Tag appearance={it.tono === "neutral" ? "neutral" : it.tono}>
-                  {it.tono === "danger" ? "Atención" : it.tono === "success" ? "Oportunidad" : it.tono === "warning" ? "Revisar" : "Info"}
-                </Tag>
+                <Tag appearance={it.tono === "neutral" ? "neutral" : it.tono}>{it.etiqueta}</Tag>
                 <Text>{it.texto}</Text>
               </Box>
             ))}
